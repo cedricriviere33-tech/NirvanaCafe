@@ -11,8 +11,8 @@
     RLS de Supabase — voir supabase-schema.sql.)
    ════════════════════════════════════════════════════════════════════════ */
 
-window.NIRVANA_SUPABASE_URL      = 'https://tezsbdvcijqwajtznitw.supabase.co';
-window.NIRVANA_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV0d3hmZXV4ZXFidWhwaXF5c3dmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5ODY5NTcsImV4cCI6MjA5OTU2Mjk1N30.xo26jHVdBBQR7IKfeCsHdZzrNRbeY7f4ehmAasLHx30';
+window.NIRVANA_SUPABASE_URL      = 'https://mgfnlybmvwdvsdujjuuv.supabase.co';
+window.NIRVANA_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1nZm5seWJtdndkdnNkdWpqdXV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQzNzgwNTUsImV4cCI6MjA5OTk1NDA1NX0.aOvp02MWyFrFjxIMVlWSET1zRTamkhbAbOefM7chpfw';
 
 /* Coordonnées affichées sur la carte publique (facultatif) */
 window.NIRVANA_NOM     = 'Nirvana Café';
