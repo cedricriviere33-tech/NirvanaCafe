@@ -1,0 +1,20 @@
+# ════════════════════════════════════════════════════════════════════════
+# NIRVANA CAFÉ — Netlify (déploiement simple, sans build)
+# Les fichiers (dont config.js) sont publiés tels quels.
+# ════════════════════════════════════════════════════════════════════════
+
+[build]
+  publish = "."
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+# Le service worker doit pouvoir contrôler toute la racine
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache"
