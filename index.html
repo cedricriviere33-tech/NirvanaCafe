@@ -420,11 +420,6 @@ canvas.chart{width:100%;max-width:100%;display:block;}
   background:radial-gradient(120% 90% at 50% -10%,#E0B23F 0%,#C79A34 45%,#9C7A1C 100%);padding:0 0 44px;}
 #starfield{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;}
 #screen-menu > *:not(#starfield){position:relative;z-index:1;}
-.menu-login{position:fixed;top:calc(14px + env(safe-area-inset-top));right:16px;z-index:20;
-  width:48px;height:48px;border-radius:50%;background:var(--card);color:var(--ocre-deep);border:2px solid var(--ocre-deep);
-  font-size:22px;display:flex;align-items:center;justify-content:center;
-  box-shadow:0 4px 14px rgba(42,32,5,.3);cursor:pointer;transition:transform .15s;}
-.menu-login:active{transform:scale(.92) rotate(-15deg);}
 .menu-hero{text-align:center;padding:46px 20px 18px;color:#2A2005;}
 /* logo animé */
 .menu-emblem{position:relative;width:96px;height:96px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;
@@ -503,7 +498,6 @@ body.sandbox .topbar{border-bottom:2px solid #7c3aed}
 <!-- ══════════════ ACCUEIL — LA CARTE (public, lecture seule) ══════════════ -->
 <div id="screen-menu">
   <canvas id="starfield"></canvas>
-  <button class="menu-login" onclick="showLogin()" title="Espace employé" aria-label="Se connecter">⭐</button>
   <div class="menu-hero">
     <div class="menu-emblem" id="menu-emblem">
       <span class="emblem-star">✦</span>
@@ -1254,7 +1248,20 @@ function normalizeMapsUrl(c){
 function telHref(n){ return 'tel:'+String(n).replace(/[^\d+]/g,''); } // garde chiffres et +
 function renderMenuHeader(){
   const c=ticketConf();
-  $('mh-nom').textContent=c.titre||'Nirvana Café';
+  // Point d'entrée discret vers l'espace employé : le DERNIER mot du titre
+  // (« Café ») est cliquable. Invisible pour un client — même couleur, même style.
+  const titre=(c.titre||'Nirvana Café').trim();
+  const mots=titre.split(/\s+/);
+  const dernier=mots.pop();
+  const nom=$('mh-nom');
+  nom.textContent = mots.length ? mots.join(' ')+' ' : '';
+  const lien=document.createElement('span');
+  lien.textContent=dernier;
+  lien.style.cursor='default';                 // pas de main → aucun indice
+  lien.setAttribute('role','button');
+  lien.setAttribute('aria-label','Espace employé');
+  lien.onclick=showLogin;
+  nom.appendChild(lien);
   $('mh-slogan').textContent=c.slogan||'Cuisine & saveurs';
   const contact=[];
   const lieu=[c.adresse,c.lieu].filter(Boolean).join(', ');

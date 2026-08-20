@@ -1,0 +1,10 @@
+# Fichiers de test (non déployés, mais on peut les garder dans le repo)
+# .test-app-*.js
+
+# Divers
+.DS_Store
+node_modules/
+*.log
+
+# ⚠ NE PAS ignorer config.js : le site statique en a besoin pour trouver Supabase.
+#   La clé anon est publique — aucun secret à cacher ici.
