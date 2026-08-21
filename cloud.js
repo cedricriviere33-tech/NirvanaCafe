@@ -305,6 +305,33 @@
     });
   }
 
+  /* Lecture de la carte PUBLIQUE (table `menu`, ouverte aux visiteurs anonymes).
+     C'est la source de la page d'accueil : elle NE dépend PAS de nirvana_sync,
+     qui est réservé aux comptes connectés. Reconvertit les lignes `menu` au
+     format produit attendu par l'application. */
+  function lireMenuPublic(){
+    if (!ready()) return Promise.resolve(null);
+    return client.from('menu').select('*')
+      .then(function(res){
+        if (res.error) { console.warn('[lireMenuPublic]', res.error.message); return null; }
+        return (res.data || []).map(function(m){
+          var boisson = (m.categorie === 'Boissons') || /boisson|soft|soda|jus|alcool|bière|biere|vin/i.test(m.categorie || '');
+          return {
+            id: m.id, nom: m.nom, description: m.description || '',
+            prix: Number(m.prix) || 0,
+            actif: m.disponible !== false,
+            categorie: m.categorie || 'Divers',
+            type: boisson ? 'boisson' : 'plat',
+            allergenes: Array.isArray(m.allergenes) ? m.allergenes : [],
+            allergDeclarePublic: !!m.allerg_declare,
+            faitMaison: !!m.fait_maison,
+            origineViande: m.origine_viande || ''
+          };
+        });
+      })
+      .catch(function(e){ console.warn('[lireMenuPublic]', e.message); return null; });
+  }
+
   function pullCollection(name){
     if (!ready()) return Promise.resolve(null);
     return client.from('nirvana_sync').select('data').eq('collection', name).maybeSingle()
@@ -320,6 +347,7 @@
     cloturer: cloturer, listerClotures: listerClotures,
     verifierIntegrite: verifierIntegrite, exportFEC: exportFEC, lireJournal: lireJournal,
     listerProfils: listerProfils, creerCompte: creerCompte, majProfil: majProfil,
-    push: push, pull: pull, pullCollection: pullCollection, publishMenu: publishMenu
+    push: push, pull: pull, pullCollection: pullCollection, publishMenu: publishMenu,
+    lireMenuPublic: lireMenuPublic
   };
 })();

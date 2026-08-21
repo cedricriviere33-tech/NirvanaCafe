@@ -1221,14 +1221,25 @@ function showLogin(){
   setTimeout(()=>{ const u=$('li-user'); if(u)u.focus(); },120);
 }
 async function loadMenuData(){
-  // données fraîches depuis le cloud si possible, sinon cache local (IndexedDB)
+  // CARTE PUBLIQUE : on lit la table `menu` (ouverte aux visiteurs anonymes),
+  // PAS nirvana_sync (réservé aux comptes connectés). C'est ce qui permet à la
+  // page d'accueil de s'afficher SANS être connecté.
   if(Sync.hasCloud && Sync.hasCloud()){
     try{
-      const prod=await window.NirvanaCloud.pullCollection('produits');
-      const conf=await window.NirvanaCloud.pullCollection('config');
-      if(Array.isArray(prod)){ state.produits=prod; await DB.persistLocal('produits',prod); }
-      if(conf&&typeof conf==='object'){ state.config=conf; await DB.persistLocal('config',conf); }
-    }catch(e){ console.warn('[menu] pull',e.message); }
+      const menu = await window.NirvanaCloud.lireMenuPublic();
+      if(Array.isArray(menu)){
+        state.produits = menu;
+        await DB.persistLocal('produits', menu);
+      }
+      // La config (nom, adresse, tél) est publique aussi : on tente, sans bloquer.
+      const conf = await window.NirvanaCloud.pullCollection('config');
+      if(conf && typeof conf==='object'){ state.config=conf; await DB.persistLocal('config',conf); }
+    }catch(e){ console.warn('[menu] lecture publique', e.message); }
+  }
+  // Repli : si le cloud n'a rien donné, on garde ce qu'il y a en cache local.
+  if(!state.produits || !state.produits.length){
+    const cache = await DB.get('produits', []);
+    if(cache && cache.length) state.produits = cache;
   }
 }
 function normalizeMapsUrl(c){

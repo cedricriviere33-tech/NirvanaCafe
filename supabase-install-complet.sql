@@ -1,14 +1,9 @@
 -- ═══════════════════════════════════════════════════════════════════════════
 -- NIRVANA CAFÉ — Installation SQL COMPLÈTE (à exécuter en UNE fois)
--- Supabase → SQL Editor → New query → coller CE fichier entier → Run.
--- Idempotent : réexécutable sans casse.
--- Contient : 1) le schéma de base (menu, nirvana_sync, paiements)
---            2) la couche Auth + conformité caisse (profils, ventes, RPC…)
+-- Supabase → SQL Editor → coller CE fichier entier → Run. Idempotent.
 -- ═══════════════════════════════════════════════════════════════════════════
 
--- ┌─────────────────────────────────────────────────────────────────────────┐
--- │ PARTIE 1/2 — SCHÉMA DE BASE                                              │
--- └─────────────────────────────────────────────────────────────────────────┘
+-- ┌─ PARTIE 1/2 — SCHÉMA DE BASE ─┐
 
 -- ════════════════════════════════════════════════════════════════════════
 -- NIRVANA CAFÉ — Schéma Supabase (PostgreSQL)
@@ -132,9 +127,7 @@ insert into public.menu (id, nom, description, prix, disponible, categorie) valu
 on conflict (id) do nothing;
 
 
--- ┌─────────────────────────────────────────────────────────────────────────┐
--- │ PARTIE 2/2 — AUTH + CONFORMITÉ CAISSE                                    │
--- └─────────────────────────────────────────────────────────────────────────┘
+-- ┌─ PARTIE 2/2 — AUTH + CONFORMITÉ + LECTURE PUBLIQUE ─┐
 
 -- ════════════════════════════════════════════════════════════════════════════
 --  NIRVANA CAFÉ — Schéma Supabase v2
@@ -677,10 +670,20 @@ create policy "menu ecriture auth" on public.menu
 -- ║     On ferme simplement la porte à la clé anon.                          ║
 -- ╚══════════════════════════════════════════════════════════════════════════╝
 alter table if exists public.nirvana_sync enable row level security;
-drop policy if exists "sync anon complet" on public.nirvana_sync;   -- ⚠ LA faille
+drop policy if exists "sync anon complet" on public.nirvana_sync;   -- ⚠ ancienne faille
 drop policy if exists "sync auth complet" on public.nirvana_sync;
-create policy "sync auth complet" on public.nirvana_sync
+drop policy if exists "sync auth all"     on public.nirvana_sync;
+drop policy if exists "sync config public" on public.nirvana_sync;
+
+-- Comptes connectés : accès complet à toute la gestion.
+create policy "sync auth all" on public.nirvana_sync
   for all to authenticated using (true) with check (true);
+
+-- Visiteurs anonymes : lecture de la SEULE ligne `config`
+-- (nom, adresse, téléphone à afficher sur la carte publique). Rien d'autre
+-- de nirvana_sync ne leur est accessible — ni stock, ni RH, ni ventes.
+create policy "sync config public" on public.nirvana_sync
+  for select to anon using (collection = 'config');
 
 -- Les collections `users`/`clients` n'ont plus rien à faire ici : les comptes
 -- vivent dans auth.users + profils. À exécuter APRÈS la migration des comptes.
