@@ -4552,7 +4552,17 @@ ${line}${franchise?'\nTVA non applicable, article 293 B du CGI':''}</pre>
     <div style="text-align:center;font-size:8px;margin-top:6px;word-break:break-all">
       ${esc(v.num)} · journal inaltérable · empreinte ${esc(String(v.hash||'').slice(0,16))}</div>`;
   const pa=$('print-area'); if(pa){ pa.innerHTML=html; }
+  // Applique la largeur papier choisie (80 ou 58 mm) juste avant d'imprimer
+  appliquerLargeurTicket((ticketConf().largeur)||'80');
   window.print();
+}
+/* Ajuste dynamiquement la largeur du ticket et du format @page.
+   Permet de passer de 80 à 58 mm depuis les réglages, sans toucher au code. */
+function appliquerLargeurTicket(mm){
+  const w = (String(mm)==='58') ? '58mm' : '80mm';
+  let st=document.getElementById('ticket-largeur-style');
+  if(!st){ st=document.createElement('style'); st.id='ticket-largeur-style'; document.head.appendChild(st); }
+  st.textContent='@media print{ #print-area{width:'+w+' !important;} @page{size:'+w+' auto;margin:0;} }';
 }
 
 /* ═══════════ TICKET DE CAISSE (personnalisation) ═══════════ */
@@ -4576,6 +4586,13 @@ function renderTicketConfig(){
           <input id="tk-tvaintra" value="${esc(c.tvaIntra||'')}" placeholder="FR 12 123456789"></div>
         <div class="field"><label>Forme juridique / capital (optionnel)</label>
           <input id="tk-forme" value="${esc(c.formeJuridique||'')}" placeholder="SARL au capital de 5 000 €"></div>
+        <div class="field"><label>Largeur du papier de l'imprimante ticket</label>
+          <select id="tk-largeur">
+            <option value="80" ${String(c.largeur||'80')==='80'?'selected':''}>80 mm (le plus courant)</option>
+            <option value="58" ${String(c.largeur||'')==='58'?'selected':''}>58 mm (petit rouleau)</option>
+          </select>
+          <div style="font-size:11px;color:var(--txt-faint);margin-top:4px">
+            À régler selon votre imprimante. En cas de doute, laissez 80 mm et faites un essai.</div></div>
         <div class="field"><label>Message de bas de ticket</label><input id="tk-msg" value="${esc(c.message||'Merci de votre visite ! À très bientôt ✦')}"></div>
         <div class="card-h" style="margin-top:6px">🌍 Carte d'accueil & réseaux</div>
         <div class="field"><label>Lien Google Maps (itinéraire)</label><input id="tk-maps" value="${esc(c.mapsUrl||'')}" placeholder="https://maps.google.com/?q=..."></div>
@@ -4599,7 +4616,7 @@ function renderTicketConfig(){
 function readTicketForm(){
   return {titre:val('tk-titre'),slogan:val('tk-slogan'),adresse:val('tk-adresse'),lieu:val('tk-lieu'),
     tel:val('tk-tel'),telFixe:val('tk-telfixe'),siret:val('tk-siret'),
-    tvaIntra:val('tk-tvaintra'),formeJuridique:val('tk-forme'),
+    tvaIntra:val('tk-tvaintra'),formeJuridique:val('tk-forme'),largeur:val('tk-largeur')||'80',
     message:val('tk-msg'),qrData:val('tk-qr'),qrLabel:val('tk-qrlabel'),
     mapsUrl:val('tk-maps'),facebook:val('tk-fb'),instagram:val('tk-ig'),tiktok:val('tk-tk'),website:val('tk-web')}; }
 function previewTicket(){
@@ -4727,7 +4744,7 @@ function drawBars(id,labels,data,unit){
 }
 function drawGroupedBars(id,labels,series,unit){
   const P=_prepCanvas(id); if(!P)return; const {ctx,w,h}=P; ctx.clearRect(0,0,w,h);
-  const pad={l:44,r:10,t:14,b:26}; const max=Math.max(1,...series.flatMap(s=>s.data));
+  const pad={l:44,r:10,t:14,b:26}; const max=Math.max(1,...series.reduce((a,s)=>a.concat(s.data||[]),[]));
   const slot=(w-pad.l-pad.r)/labels.length; const bw=slot*0.34;
   ctx.strokeStyle='rgba(58,44,12,.2)'; ctx.fillStyle='#4A3D1E'; ctx.font='11px sans-serif';
   for(let i=0;i<=4;i++){ const y=pad.t+(h-pad.t-pad.b)*i/4;
@@ -5062,6 +5079,28 @@ async function loadAll(){
   state.charges      = await DB.get('charges',[]);
   state.rapports     = await DB.get('rapports',[]);
 }
+/* Garde-fou navigateur : si le moteur est trop ancien pour l'app (ex. très
+   vieux Firefox/IE), on affiche un message clair plutôt qu'un écran blanc. */
+(function verifNavigateur(){
+  var okES = true;
+  try{ new Function('const a=async()=>{let[x]=[1];return {...{}}};'); }catch(e){ okES=false; }
+  var okFetch = typeof fetch === 'function';
+  var okIDB   = typeof indexedDB !== 'undefined';
+  if(!(okES && okFetch && okIDB)){
+    document.addEventListener('DOMContentLoaded', function(){
+      document.body.innerHTML =
+        '<div style="max-width:520px;margin:60px auto;padding:24px;font-family:sans-serif;'+
+        'background:#FBF4E2;border:2px solid #C25E00;border-radius:14px;color:#3A2C0C;line-height:1.6">'+
+        '<h2 style="margin-top:0;color:#C25E00">Navigateur trop ancien</h2>'+
+        '<p>Cette application a besoin d\'un navigateur récent pour fonctionner.</p>'+
+        '<p><b>Sur cette caisse (Windows 7) : installez Firefox 115 ESR</b>, '+
+        'la dernière version compatible. Elle est gratuite et fait tourner l\'application sans souci.</p>'+
+        '<p style="font-size:13px;color:#6E5E33">Rendez-vous sur le site de Mozilla, section « Firefox ESR ».</p></div>';
+    });
+    throw new Error('Navigateur incompatible');
+  }
+})();
+
 (async function init(){
   try{
     await DB.init();

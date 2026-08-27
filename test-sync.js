@@ -10,7 +10,8 @@ function mkEnv(){
     clear:()=>{for(const k in store)delete store[k];},
     _dump:()=>store
   };
-  global.indexedDB = undefined;           // force le repli localStorage (même code de lecture)
+  global.indexedDB = { open:function(){ var r={}; setTimeout(function(){ if(r.onerror) r.onerror({target:{}}); },0); return r; } };
+  global.fetch = global.fetch || (()=>Promise.reject(new Error('no fetch in test')));           // force le repli localStorage (même code de lecture)
   // Node ≥21 expose un `navigator` natif non inscriptible → redéfinition forcée
   Object.defineProperty(global, 'navigator', { value:{ onLine:true }, configurable:true, writable:true });
   global.window = global;

@@ -1,7 +1,7 @@
 /* Nirvana Café — service worker (offline).
    Réseau d'abord, cache en secours. N'intercepte QUE le même domaine
    (Supabase & CDN passent normalement → la synchro cloud reste intacte). */
-const CACHE = 'nirvana-v8';   // bump : carte publique lit la table menu (lecture anonyme)
+const CACHE = 'nirvana-v9';   // bump : compat caisse (garde-fou navigateur, largeur ticket 80/58mm)
 const CORE = ['./', './index.html', './menu.html', './qrcode.js', './cloud.js',
   './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 

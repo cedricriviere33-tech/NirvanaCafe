@@ -28,7 +28,8 @@ function mkEnv(){
   const store = {};
   global.localStorage = { getItem:k=>(k in store?store[k]:null), setItem:(k,v)=>{store[k]=String(v);},
     removeItem:k=>{delete store[k];}, clear:()=>{for(const k in store)delete store[k];} };
-  global.indexedDB = undefined;
+  global.indexedDB = { open:function(){ var r={}; setTimeout(function(){ if(r.onerror) r.onerror({target:{}}); },0); return r; } };
+  global.fetch = global.fetch || (()=>Promise.reject(new Error('no fetch in test')));
   Object.defineProperty(global,'navigator',{value:{onLine:true},configurable:true,writable:true});
   global.window = global;
   global.addEventListener = ()=>{};
