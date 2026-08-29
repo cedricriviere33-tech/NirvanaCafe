@@ -28,6 +28,12 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Nirvana Café">
 <title>Nirvana Café — Gestion</title>
+<!-- Police emoji : Windows 7 n'a pas d'emoji couleur → sans ça, l'interface admin
+     affiche des carrés. Noto Emoji (N&B) garantit un rendu propre des pictos.
+     La carte publique (téléphones clients) garde ses emojis couleur (voir CSS #screen-menu). -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Emoji&display=swap">
 <style>
 /* ═══════════════════════ THÈME MOUTARDE OCRE · TEXTE NOIR ═══════════════════════ */
 :root{
@@ -53,7 +59,7 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;}
 body{
-  font-family:'Segoe UI',system-ui,-apple-system,Roboto,sans-serif;
+  font-family:'Segoe UI',system-ui,-apple-system,Roboto,sans-serif,'Noto Emoji';
   background:var(--bg-grad); background-attachment:fixed;
   color:var(--txt); min-height:100vh; -webkit-font-smoothing:antialiased;
   font-size:16px; overscroll-behavior:none;
@@ -481,6 +487,8 @@ canvas.chart{width:100%;max-width:100%;display:block;}
   .no-print{display:none!important;}
 }
 /* ═══════════ ACCUEIL — LA CARTE (public) ═══════════ */
+/* Pas de 'Noto Emoji' ici : sur les téléphones clients on veut les emojis EN COULEUR. */
+#screen-menu, #screen-menu *{font-family:'Segoe UI',system-ui,-apple-system,Roboto,sans-serif;}
 #screen-menu{display:block;min-height:100vh;position:relative;overflow-x:hidden;
   background:radial-gradient(120% 90% at 50% -10%,#E0B23F 0%,#C79A34 45%,#9C7A1C 100%);padding:0 0 44px;}
 #starfield{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;}
